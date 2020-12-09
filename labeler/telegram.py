@@ -61,35 +61,35 @@ if __name__ == "__main__":
     def cmd_start(message):
         response = ["Привет! Введи код, пожалуйста."]
         bot.send_message(message.from_user.id, "\n".join(response))
-        db.set_state(message.from_user.id, config.States.S_CODE.value)
+        db.set_state(message.chat.id, config.States.S_CODE.value)
 
 
     @bot.message_handler(content_types=['text'],
-                         func=lambda message: db.get_current_state(message.from_user.id) == config.States.S_CODE.value)
+                         func=lambda message: db.get_current_state(message.chat.id) == config.States.S_CODE.value)
     def cmd_code(message):
         code = message.text.lower()
         if code != 'канапе':
             bot.send_message(message.from_user.id, 'Неверный код. Попробуй ещё раз')
         else:
-            msg, markup = format_question(unchecked_data, message.from_user.id, on_check)
+            msg, markup = format_question(unchecked_data, message.chat.id, on_check)
             bot.send_message(message.from_user.id, msg, reply_markup=markup)
             db.set_state(message.chat.id, config.States.S_ANSWER.value)
 
 
     @bot.message_handler(content_types=['text'],
-                         func=lambda message: db.get_current_state(message.from_user.id) == config.States.S_ANSWER.value)
+                         func=lambda message: db.get_current_state(message.chat.id) == config.States.S_ANSWER.value)
     def process_answer(message):
-        if message.from_user.id not in on_check:
+        if message.chat.id not in on_check:
             db.set_state(message.chat.id, config.States.S_START.value)
             bot.send_message(message.from_user.id, 'Что-то пошло не так, давай начнём с начала. Напиши /start.')
         else:
-            question = on_check[message.from_user.id]
+            question = on_check[message.chat.id]
             answer = message.text
             question['status'] = answer
             checked_data.append(question)
             save_data('checked.json', checked_data)
             unchecked_data[question["idx"]][2] = "checked"
-            msg, markup = format_question(unchecked_data, message.from_user.id, on_check)
+            msg, markup = format_question(unchecked_data, message.chat.id, on_check)
             bot.send_message(message.from_user.id, msg, reply_markup=markup)
 
     bot.polling(none_stop=True, interval=0)
