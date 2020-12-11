@@ -71,7 +71,7 @@ if __name__ == "__main__":
         if code != 'канапе':
             bot.send_message(message.from_user.id, 'Неверный код. Попробуй ещё раз')
         else:
-            msg, markup = format_question(unchecked_data, message.chat.id, on_check)
+            msg, markup = format_question(unchecked_data, message.from_user.id, on_check)
             bot.send_message(message.from_user.id, msg, reply_markup=markup)
             db.set_state(message.chat.id, config.States.S_ANSWER.value)
 
@@ -79,17 +79,17 @@ if __name__ == "__main__":
     @bot.message_handler(content_types=['text'],
                          func=lambda message: db.get_current_state(message.chat.id) == config.States.S_ANSWER.value)
     def process_answer(message):
-        if message.chat.id not in on_check:
+        if message.from_user.id not in on_check:
             db.set_state(message.chat.id, config.States.S_START.value)
             bot.send_message(message.from_user.id, 'Что-то пошло не так, давай начнём с начала. Напиши /start.')
         else:
-            question = on_check[message.chat.id]
+            question = on_check[message.from_user.id]
             answer = message.text
             question['status'] = answer
-            checked_data.append(question)
+            checked_data.append({message.from_user.id: question})
             save_data('checked.json', checked_data)
             unchecked_data[question["idx"]][2] = "checked"
-            msg, markup = format_question(unchecked_data, message.chat.id, on_check)
+            msg, markup = format_question(unchecked_data, message.from_user.id, on_check)
             bot.send_message(message.from_user.id, msg, reply_markup=markup)
 
     bot.polling(none_stop=True, interval=0)
