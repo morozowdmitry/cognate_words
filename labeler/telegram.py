@@ -40,7 +40,7 @@ def pick_unchecked_root(df):
 
 
 def pick_unnested_word(df):
-    unnested_df = df[(~df["status"].isin(["unchecked", "on_check", "Не знаю"])) & (df["nest"] == "unchecked")]
+    unnested_df = df[(df["status"] == "Да") & (df["nest"] == "unchecked")]
     if unnested_df.empty:
         return -1
     else:
@@ -87,7 +87,7 @@ def format_question_nest(df, nests, alternations, user_id, on_check):
         for nest in nests.get(root, []):
             answers[nest["words"][0]] = nest["id"]
 
-    checked_df = df[~df["nest"].isin(["unchecked", "on_check", "Не знаю"])]
+    checked_df = df[~df["nest"].isin(["unchecked", "on_check"])]
     if checked_df.empty:
         answers["Эти слова не подходят"] = 1
     else:
