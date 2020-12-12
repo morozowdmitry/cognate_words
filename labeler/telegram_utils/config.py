@@ -13,5 +13,6 @@ class States(Enum):
     """
     S_START = "0"  # Начало нового диалога
     S_CODE = "1"
-    S_QUESTION = "2"
-    S_ANSWER = "3"
+    S_NEST = "2"
+    S_ROOT = "3"
+    S_MODE = "4"
