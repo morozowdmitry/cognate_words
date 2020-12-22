@@ -1,0 +1,3 @@
+[submodule "NeuralMorphemeSegmentation"]
+	path = NeuralMorphemeSegmentation
+	url = https://github.com/morozowdmitry/NeuralMorphemeSegmentation.git

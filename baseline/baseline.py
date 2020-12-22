@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-from neural_morph_segm import load_cls
+from NeuralMorphemeSegmentation.neural_morph_segm import load_cls
 
 import sys
+import pandas as pd
+from pathlib import Path
+import tensorflow as tf
 
 
 def getRoots(words):
@@ -88,10 +91,18 @@ def parseRow(row):
     for_insert.extend(a[1:])
     return row
 
-if __name__ == "__main__":
-    model = load_cls("models/morphemes-3-5-3-memo.json")
 
-    import pandas as pd
+if __name__ == "__main__":
+
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+    path = Path(__file__).parent.parent / "models/morphemes-3-5-3-memo.json"
+    model = load_cls(path)
+    #
+    # print(model.predict(["землетрясение"]))
+
+
 
     data2 = pd.read_csv("data/ds_common_words_utf_8.csv")
     data2_tmp = pd.read_csv("data/ds_common_words_utf_8.csv")
