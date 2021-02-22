@@ -620,7 +620,7 @@ class Partitioner:
                 curr_callbacks = self.callbacks
             model.fit_generator(train_gen, len(train_batches_indexes),
                                 epochs=self.nepochs, callbacks=curr_callbacks,
-                                validation_data=val_gen, validation_steps=len(dev_batches_indexes))
+                                validation_data=val_gen, validation_steps=len(dev_batches_indexes), use_multiprocessing=True)
             if model_file is not None:
                 model.load_weights(curr_model_file)
         return self

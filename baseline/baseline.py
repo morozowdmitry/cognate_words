@@ -113,15 +113,15 @@ def f1_for_row(row):
 
 
 if __name__ == "__main__":
-    model = load_cls("models/morphemes-3-5-3-memo.json")
+    model = load_cls("models/morphemes-3-5-3-memo_reformat.json")
 
     import pandas as pd
 
     data2 = pd.read_csv("data/ds_common_words_utf_8_test.csv")
 
-    # res = getRoots(data2['word'])
-    # roots = [getBestRoot(r)[0] for r in res]
-    roots = data2['word'].apply(find_root)
+    res = getRoots(data2['word'])
+    roots = [getBestRoot(r)[0] for r in res]
+    # roots = data2['word'].apply(find_root)
 
     data = data2.apply(prepaire_root, axis=1, result_type='expand')
     data[2] = roots
