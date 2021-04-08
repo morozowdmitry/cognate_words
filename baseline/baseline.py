@@ -90,26 +90,39 @@ def parseRow(row):
     for_insert.extend(a[1:])
     return row
 
+# def prepaire_root(row):
+#     root_split = row[1].split('_')[0].split('(')
+#     base_root = root_split[0]
+#     if len(root_split) > 1:
+#         end_root = root_split[1][:-1]
+#         other_root = f'{base_root[:-len(end_root)]}{end_root}'
+#         if other_root in row[0]:
+#             return (row[0], other_root)
+#     return (row[0], base_root)
 def prepaire_root(row):
-    root_split = row[1].split('_')[0].split('(')
-    base_root = root_split[0]
-    if len(root_split) > 1:
-        end_root = root_split[1][:-1]
-        other_root = f'{base_root[:-len(end_root)]}{end_root}'
-        if other_root in row[0]:
-            return (row[0], other_root)
-    return (row[0], base_root)
+    root_split = row['root'].split()
+    return generate_bitmask_for_list(row['word'],root_split)
 
-
-def generate_bitmask(word, root):
+def generate_bitmask(word: str, root: str):
     bitmask = [0] * len(word)
     start_idx = word.find(root)
     for i in range(start_idx, start_idx+len(root)):
         bitmask[i] = 1
     return bitmask
 
+def generate_bitmask_for_list(word: str, roots: list):
+    bitmask = [0] * len(word)
+    for r in roots:
+        start_idx = word.find(r)
+        for i in range(start_idx, start_idx+len(r)):
+            bitmask[i] = 1
+    return bitmask
+
 def f1_for_row(row):
-    return f1_score(generate_bitmask(row[0], row[1]), generate_bitmask(row[0], row[2]))
+    return f1_score(row[1], row[2])
+
+def get_only_root(pairs):
+    return [p[0] for p in pairs]
 
 
 if __name__ == "__main__":
@@ -117,16 +130,24 @@ if __name__ == "__main__":
 
     import pandas as pd
 
-    data2 = pd.read_csv("data/ds_common_words_utf_8_test.csv")
+    data2 = pd.read_csv("data/test_230_words_ds_common_words_utf_8.csv")
 
     res = getRoots(data2['word'])
-    roots = [getBestRoot(r)[0] for r in res]
+    print(len(res), len(data2['word']))
+
+
+
+
+    roots = [get_only_root(r) for r in res]
+
+    bitmasks = [generate_bitmask_for_list(word, roots=root_) for root_, word in zip(roots, data2['word'])]
+    # roots = [getBestRoot(r)[0] for r in res]
     # roots = data2['word'].apply(find_root)
 
-    data = data2.apply(prepaire_root, axis=1, result_type='expand')
-    data[2] = roots
-
-    res = data.apply(f1_for_row, axis=1)
+    data2[1] = data2.apply(prepaire_root, axis=1)
+    data2[2] = bitmasks
+    data2.to_csv('tmp.csv', index=None)
+    res = data2.apply(f1_for_row, axis=1)
     print(res.mean(axis=0))
 
 
