@@ -15,8 +15,8 @@ from keras.models import Model
 from keras.optimizers import Adam as adam
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
-from read import extract_morpheme_type, read_BMES, read_splitted
-from tabled_trie import make_trie
+from .read import extract_morpheme_type, read_BMES, read_splitted
+from .tabled_trie import make_trie
 
 
 def read_config(infile):

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from neural_morph_segm import load_cls
+from .neural_morph_segm import load_cls
 from sklearn.metrics import f1_score
 import sys
 import numpy as np
 
-from evristic import find_root
+# from .evristic import find_root
 
-def getRoots(words):
+def getRoot(word, model):
     ans = []
-    for word, (labels, probs) in zip(words, model._predict_probs(words)):
+    for word, (labels, probs) in zip([word], model._predict_probs([word])):
         morphemes, morpheme_probs, morpheme_types = model.labels_to_morphemes(
             word, labels, probs, return_probs=True, return_types=True)
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     data2 = pd.read_csv("data/test_230_words_ds_common_words_utf_8.csv")
 
-    res = getRoots(data2['word'])
+    res = getRoots(data2['word'], model)
     print(len(res), len(data2['word']))
 
 
