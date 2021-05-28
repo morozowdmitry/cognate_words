@@ -5,6 +5,7 @@ import sys
 import numpy as np
 
 from evristic import find_root
+from root_alternation import find_possible_root_alternations
 
 def getRoots(words):
     ans = []
@@ -48,6 +49,8 @@ def getInput(word1, word2):
                 "postfix_1": "",
                 "prefix_2": r[1],
                 "postfix_2": "",
+                "root_1": r[0],
+                "root_2": r[1],
                 "substr_len": len(substr)
             })
             continue
@@ -57,6 +60,8 @@ def getInput(word1, word2):
             "postfix_1": roots_splited[0][1],
             "prefix_2": roots_splited[1][0],
             "postfix_2": roots_splited[1][1],
+            "root_1": r[0],
+            "root_2": r[1],
             "substr_len": len(substr)
         })
     return res
@@ -100,6 +105,7 @@ def parseRow(row):
 #             return (row[0], other_root)
 #     return (row[0], base_root)
 def prepaire_root(row):
+    # print(row)
     root_split = row['root'].split()
     return generate_bitmask_for_list(row['word'],root_split)
 
@@ -124,31 +130,50 @@ def f1_for_row(row):
 def get_only_root(pairs):
     return [p[0] for p in pairs]
 
+def getEvristicCognate(word1, word2):
+    mix_roots = {"гар":"гор","клан":"клон", "твар":"твор","зар":"зор","плав":"плов", "кас":"кос","мак":"мок","равн":"ровн","раст":"ращ","ращ":"рос","раст":"рос","скак":"скоч","лаг":"лож",
+             "бер":"бир","дер":"дир","мер":"мир","пер":"пир","тер":"тир","жег":"жиг","блест":"блист","стел":"стил","чет":"чит"}
+    root1, root2 = getRoots([word1, word2])
+    root1 = get_only_root(root1)
+    root2 = get_only_root(root2)
+    root1_mix = []
+    for r in root1:
+        root1_mix.extend(find_possible_root_alternations(r))
+        if r in mix_roots:
+            root1_mix.append(mix_roots[r])
+    root2_mix = []
+    for r in root2:
+        root2_mix.extend(find_possible_root_alternations(r))
+        if r in mix_roots:
+            root1_mix.append(mix_roots[r])      
+
+    return bool(set(root1_mix).intersection(root2_mix))
 
 if __name__ == "__main__":
-    model = load_cls("models/morphemes-3-5-3-memo_reformat.json")
+    model = load_cls("models/morphemes-3-5-3-memo_dima.json")
 
-    import pandas as pd
+    print(getEvristicCognate('летчик', 'самолет'))
+    # import pandas as pd
 
-    data2 = pd.read_csv("data/test_230_words_ds_common_words_utf_8.csv")
+    # data2 = pd.read_csv("data/test_230_words_ds_common_words_utf_8.csv")
 
-    res = getRoots(data2['word'])
-    print(len(res), len(data2['word']))
-
-
+    # res = getRoots(data2['word'])
+    # print(len(res), len(data2['word']))
 
 
-    roots = [get_only_root(r) for r in res]
 
-    bitmasks = [generate_bitmask_for_list(word, roots=root_) for root_, word in zip(roots, data2['word'])]
-    # roots = [getBestRoot(r)[0] for r in res]
-    # roots = data2['word'].apply(find_root)
 
-    data2[1] = data2.apply(prepaire_root, axis=1)
-    data2[2] = bitmasks
-    data2.to_csv('tmp.csv', index=None)
-    res = data2.apply(f1_for_row, axis=1)
-    print(res.mean(axis=0))
+    # roots = [get_only_root(r) for r in res]
+
+    # bitmasks = [generate_bitmask_for_list(word, roots=root_) for root_, word in zip(roots, data2['word'])]
+    # # roots = [getBestRoot(r)[0] for r in res]
+    # # roots = data2['word'].apply(find_root)
+
+    # data2[1] = data2.apply(prepaire_root, axis=1)
+    # data2[2] = bitmasks
+    # data2.to_csv('tmp.csv', index=None)
+    # res = data2.apply(f1_for_row, axis=1)
+    # print(res.mean(axis=0))
 
 
 
@@ -176,3 +201,8 @@ if __name__ == "__main__":
     # words_list = list(map(str.strip, words))
     # print(getRoots(words_list))
     # print(getInput(*words_list))
+
+
+
+
+
