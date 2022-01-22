@@ -4,8 +4,13 @@ from sklearn.metrics import f1_score
 import sys
 import numpy as np
 
-from evristic import find_root
 from root_alternation import find_possible_root_alternations
+from pathlib import Path
+model = None
+
+def init(path):
+    global model
+    model = load_cls(path)
 
 def getRoots(words):
     ans = []
@@ -150,9 +155,37 @@ def getEvristicCognate(word1, word2):
     return bool(set(root1_mix).intersection(root2_mix))
 
 if __name__ == "__main__":
-    model = load_cls("models/morphemes-3-5-3-memo_dima.json")
+    import pandas as pd
+    import json
+    from collections import defaultdict
+    model_dir = Path("models")
 
-    print(getEvristicCognate('летчик', 'самолет'))
+    model = load_cls(model_dir / "morphemes-3-5-3-memo_reformat.json")
+    # print(getRoots(['самолет']), get_only_root(getRoots(['самолет'])))
+    df = pd.read_csv("input.csv")
+    df['Roots'] = df['Lemma'].apply(lambda x: get_only_root(getRoots([x])[0]))
+    
+    result_dict = defaultdict(list)
+    
+    tichonov_df = pd.read_csv('data/test_Tikhonov_reformat_only_roots.txt')
+    tichonov_df['Roots'] = tichonov_df['root'].apply(lambda x: [i.strip() for i in x.split(' ')])
+    # print(tichonov_df.head)
+    # for idx, row in tichonov_df[tichonov_df.root.isin(df["Roots"].to_list())].iterrows():
+    #     print(row['word'])
+    available_roots = set()
+    for _, row in df.iterrows():
+        for root in row['Roots']:
+            available_roots.add(root)
+
+    for _, row in tichonov_df.iterrows():
+        for root in row['Roots']:
+            if root in available_roots:
+                result_dict[root].append(row['word'])
+
+    with open("output.json", 'w') as f:
+        json.dump(result_dict, f, ensure_ascii=False, indent=2)
+
+    # df.to_csv('output.csv')
     # import pandas as pd
 
     # data2 = pd.read_csv("data/test_230_words_ds_common_words_utf_8.csv")
